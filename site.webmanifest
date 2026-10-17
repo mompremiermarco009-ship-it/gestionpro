@@ -2,7 +2,7 @@
   "name": "GestionPro",
   "short_name": "GestionPro",
   "description": "Application de gestion de vente, stock et rentabilité.",
-  "start_url": "./index.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#f4f6fb",
   "theme_color": "#10b981",
