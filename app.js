@@ -1053,22 +1053,25 @@ function initInstallBanner() {
   const closeBtn = document.getElementById("closeBanner");
   if (!banner || !closeBtn) return;
 
+  // Vérifier si l'appli tourne déjà en mode application (PWA installée)
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  const hasClosed = localStorage.getItem("gp_hideInstallBanner") === "true";
-
-  if (!isStandalone && !hasClosed) {
+  
+  // Si on est sur le navigateur (pas installé), on affiche le bandeau À CHAQUE FOIS
+  if (!isStandalone) {
     setTimeout(() => {
       banner.classList.remove("hidden");
+      // Force le navigateur à recalculer l'affichage pour lancer l'animation
       void banner.offsetWidth; 
       banner.classList.add("show");
       lucide.createIcons();
-    }, 1500);
+    }, 1000); // Apparaît après 1 seconde
   }
 
+  // Si l'utilisateur clique sur la croix pour fermer
   closeBtn.addEventListener("click", () => {
     banner.classList.remove("show");
+    // On le cache visuellement, mais on ne l'enregistre PLUS dans le localStorage
     setTimeout(() => banner.classList.add("hidden"), 300);
-    localStorage.setItem("gp_hideInstallBanner", "true");
   });
 }
 
