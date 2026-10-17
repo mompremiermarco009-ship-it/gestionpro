@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="GestionPro — gestion : ventes, dépenses, stock, rentabilité.">
+<title>GestionPro</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="brand-mark">📊</span>
+      <h1>GestionPro</h1>
+      <p id="authSubtitle">Connecte-toi pour gérer ton entreprise</p>
+    </div>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="authTabLogin">Connexion</button>
+      <button type="button" class="auth-tab" id="authTabSignup">Créer un compte</button>
+    </div>
+    <form id="authForm" class="auth-form">
+      <label>Adresse e-mail<input type="email" id="authEmail" autocomplete="email" required placeholder="toi@exemple.com"></label>
+      <label>Mot de passe<input type="password" id="authPassword" autocomplete="current-password" required minlength="6" placeholder="6 caractères minimum"></label>
+      <label id="authConfirmWrap" class="hidden">Confirme le mot de passe<input type="password" id="authPasswordConfirm" autocomplete="new-password" minlength="6"></label>
+      <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Se connecter</button>
+      <p class="auth-status" id="authStatus" role="status"></p>
+      <p class="auth-switch" id="authSwitch">Pas encore de compte ? <button type="button" class="link-btn" id="authSwitchBtn">Créer un compte</button></p>
+    </form>
+    <div class="auth-footer"><p class="hint">🔒 Tes données sont chiffrées.</p></div>
+  </div>
+</div>
+
+<div id="appScreen" class="app-screen hidden">
+  <a class="skip" href="#contenu">Aller au contenu</a>
+  <header class="topbar no-print">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark">📊</span><div><strong>GestionPro</strong><small id="companyName">Mon Entreprise</small></div></div>
+      <div class="topbar-actions">
+        <small id="userEmail" style="color:var(--muted);font-size:.8rem"></small>
+        <button class="icon-btn" id="themeToggle" aria-label="Mode sombre">🌙</button>
+        <button class="icon-btn" id="logoutBtn" title="Se déconnecter" aria-label="Se déconnecter">🚪</button>
+      </div>
+    </div>
+    <nav class="tabbar" aria-label="Navigation principale">
+      <button class="tab active" data-view="dashboard"><span>🏠</span> Tableau de bord</button>
+      <button class="tab" data-view="vente"><span>🛒</span> Vente</button>
+      <button class="tab" data-view="depense"><span>📤</span> Dépense</button>
+      <button class="tab" data-view="stock"><span>📦</span> Stock <span class="badge-alert hidden" id="stockBadge">0</span></button>
+      <button class="tab" data-view="rentabilite"><span>🏆</span> Rentabilité</button>
+      <button class="tab" data-view="tendances"><span>📈</span> Tendances</button>
+      <button class="tab" data-view="historique"><span>📜</span> Historique</button>
+      <button class="tab" data-view="rapports"><span>📊</span> Rapports</button>
+      <button class="tab" data-view="parametres"><span>⚙️</span> Paramètres</button>
+    </nav>
+  </header>
+
+  <main id="contenu">
+    <section class="view active" id="view-dashboard">
+      <div class="section-head">
+        <div><h1>Tableau de bord</h1><p id="periodLabel">Ce mois</p></div>
+        <div class="period-selector" role="tablist">
+          <button class="period-btn" data-period="today">Aujourd’hui</button>
+          <button class="period-btn" data-period="week">7 jours</button>
+          <button class="period-btn active" data-period="month">Ce mois</button>
+          <button class="period-btn" data-period="quarter">Trimestre</button>
+          <button class="period-btn" data-period="year">Année</button>
+          <button class="period-btn" data-period="all">Tout</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <article class="kpi kpi-green"><span class="kpi-label">💰 Entrées (ventes)</span><strong class="kpi-value" id="kpiEntrees">—</strong><small class="kpi-sub" id="kpiEntreesCount">0 opération</small></article>
+        <article class="kpi kpi-red"><span class="kpi-label">📤 Sorties (dépenses)</span><strong class="kpi-value" id="kpiSorties">—</strong><small class="kpi-sub" id="kpiSortiesCount">0 opération</small></article>
+        <article class="kpi kpi-blue"><span class="kpi-label">📈 Bénéfice brut</span><strong class="kpi-value" id="kpiBenefice">—</strong><small class="kpi-sub" id="kpiMarge">Marge : —</small></article>
+        <article class="kpi kpi-purple"><span class="kpi-label">🧾 Bénéfice net estimé</span><strong class="kpi-value" id="kpiNet">—</strong><small class="kpi-sub" id="kpiCharges">Charges : —</small></article>
+        <article class="kpi kpi-yellow"><span class="kpi-label">💎 Estimation du stock</span><strong class="kpi-value" id="kpiStockValue">—</strong><small class="kpi-sub" id="kpiStockCount">0 produit</small></article>
+      </div>
+      <div class="alert hidden" id="alertPerte">⚠️ Attention : cette période est en perte.</div>
+      <div class="alert alert-info hidden" id="alertCharges">ℹ️ Le taux de charges s’applique au CA.</div>
+      <div class="alert alert-warn hidden" id="alertStock">📦 <strong><span id="alertStockCount">0</span> produit(s)</strong> en stock faible. <button class="link-btn" data-goto="stock">Voir le stock →</button></div>
+      <article class="card chart-card">
+        <div class="card-head"><h2>Entrées vs Sorties</h2>
+          <div class="chart-controls">
+            <div class="gran-selector">
+              <button class="gran-btn" data-gran="day">Jour</button>
+              <button class="gran-btn active" data-gran="week">Semaine</button>
+              <button class="gran-btn" data-gran="month">Mois</button>
+            </div>
+            <button class="btn btn-ghost btn-download" data-download="chartDaily">📥 PNG</button>
+          </div>
+        </div>
+        <div class="chart-wrap" id="chartDaily"></div>
+      </article>
+      <article class="card chart-card">
+        <div class="card-head"><h2>Entrées vs Sorties — 12 derniers mois</h2><button class="btn btn-ghost btn-download" data-download="chartMonthly">📥 PNG</button></div>
+        <div class="chart-wrap" id="chartMonthly"></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><h2>Dernières opérations</h2><button class="btn btn-ghost" data-goto="historique">Tout voir →</button></div>
+        <div class="table-wrap"><table class="data-table" id="recentTable"><thead><tr><th>Date</th><th>Type</th><th>Catégorie</th><th>Description</th><th class="num">Montant</th></tr></thead><tbody></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="view" id="view-vente">
+      <div class="section-head"><div><h1>🛒 Vente</h1><p>Clique sur le produit que tu veux vendre.</p></div><input type="search" id="saleSearch" class="search-sm" placeholder="🔎 Rechercher un produit…"></div>
+      <div id="saleGrid" class="sale-grid"></div>
+      <p id="saleEmpty" class="empty-state hidden">Aucun produit. Va dans l’onglet <strong>Stock</strong>.</p>
+    </section>
+
+    <section class="view" id="view-depense">
+      <div class="section-head"><div><h1>📤 Dépense</h1><p>Enregistre une sortie d’argent.</p></div></div>
+      <form class="form-card" id="depenseForm">
+        <div class="form-row"><label>Date<input type="date" id="depDate" required></label><label>Montant<input type="number" id="depMontant" step="0.01" min="0.01" required></label></div>
+        <label>Catégorie<select id="depCategorie"></select></label>
+        <label>Description (optionnel)<input type="text" id="depDescription" maxlength="120"></label>
+        <div class="form-actions"><button type="submit" class="btn btn-primary">💾 Enregistrer la dépense</button><button type="reset" class="btn btn-ghost">Effacer</button></div>
+        <p class="form-status" id="depStatus"></p>
+      </form>
+      <article class="card"><h2>Dépenses du jour</h2><div class="table-wrap"><table class="data-table" id="depTable"><thead><tr><th>Date</th><th>Catégorie</th><th>Description</th><th class="num">Montant</th><th></th></tr></thead><tbody></tbody></table></div></article>
+    </section>
+
+    <section class="view" id="view-stock">
+      <div class="section-head"><div><h1>📦 Stock</h1><p>Pour vendre, va dans <strong>🛒 Vente</strong>.</p></div><button class="btn btn-primary" id="btnNewProduct">+ Nouveau produit</button></div>
+      <div class="kpi-grid">
+        <article class="kpi kpi-green"><span class="kpi-label">Produits actifs</span><strong class="kpi-value" id="stockTotalProducts">—</strong><small class="kpi-sub">Enregistrés</small></article>
+        <article class="kpi kpi-blue"><span class="kpi-label">Somme des prix d’achat</span><strong class="kpi-value" id="stockTotalCost">—</strong><small class="kpi-sub">Prix d’achat des produits</small></article>
+        <article class="kpi kpi-purple"><span class="kpi-label">💎 Estimation du stock</span><strong class="kpi-value" id="stockTotalSale">—</strong><small class="kpi-sub">Prix vente × stock</small></article>
+        <article class="kpi kpi-red"><span class="kpi-label">Alertes stock</span><strong class="kpi-value" id="stockAlerts">—</strong><small class="kpi-sub">Sous le seuil</small></article>
+      </div>
+      <div class="alert alert-warn hidden" id="stockAlertBox">⚠️ À réapprovisionner : <strong id="stockAlertList">—</strong></div>
+      <article class="card">
+        <div class="card-head"><h2>Produits</h2><input type="search" id="stockSearch" class="search-sm" placeholder="🔎 Rechercher…"></div>
+        <div class="table-wrap">
+          <table class="data-table" id="productTable">
+            <thead><tr><th data-sort="nom">Produit</th><th data-sort="prixAchat" class="num">Coût unit.</th><th data-sort="prixVente" class="num">Prix vente</th><th data-sort="marge" class="num">Bénéfice unit.</th><th data-sort="quantite" class="num">Stock</th><th data-sort="estimation" class="num">Estimation</th><th class="num">Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-head"><h2>Mouvements récents</h2><button class="btn btn-ghost" id="btnNewMovement">+ Nouveau mouvement</button></div>
+        <div class="table-wrap"><table class="data-table" id="movementTable"><thead><tr><th>Date</th><th>Produit</th><th>Type</th><th class="num">Qté</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="view" id="view-rentabilite">
+      <div class="section-head">
+        <div><h1>🏆 Rentabilité par produit</h1><p>Vois quel produit te rapporte, et lequel te fait perdre.</p></div>
+        <div class="period-selector" role="tablist">
+          <button class="period-btn" data-rent-period="today">Aujourd’hui</button>
+          <button class="period-btn" data-rent-period="week">7 jours</button>
+          <button class="period-btn active" data-rent-period="month">Ce mois</button>
+          <button class="period-btn" data-rent-period="quarter">Trimestre</button>
+          <button class="period-btn" data-rent-period="year">Année</button>
+          <button class="period-btn" data-rent-period="all">Tout</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <article class="kpi kpi-green"><span class="kpi-label">💰 CA total</span><strong class="kpi-value" id="rentCATotal">—</strong><small class="kpi-sub" id="rentCATotalSub">0 vendu</small></article>
+        <article class="kpi kpi-red"><span class="kpi-label">💸 Coût d’achat</span><strong class="kpi-value" id="rentCoutTotal">—</strong><small class="kpi-sub">Coût × qté vendue</small></article>
+        <article class="kpi kpi-blue"><span class="kpi-label">📈 Bénéfice total</span><strong class="kpi-value" id="rentBeneficeTotal">—</strong><small class="kpi-sub" id="rentMargeMoyenne">Marge : —</small></article>
+        <article class="kpi kpi-yellow"><span class="kpi-label">🏆 Meilleur produit</span><strong class="kpi-value" id="rentTopProduct" style="font-size:1.1rem">—</strong><small class="kpi-sub" id="rentTopProductSub">—</small></article>
+      </div>
+      <div class="alert hidden" id="alertProduitsPerte">🚨 <strong><span id="alertProduitsPerteCount">0</span> produit(s)</strong> vendu(s) en <strong>perte</strong>.</div>
+      <article class="card">
+        <div class="card-head"><h2>Détail par produit</h2><input type="search" id="rentSearch" class="search-sm" placeholder="🔎 Rechercher…"></div>
+        <div class="table-wrap">
+          <table class="data-table" id="rentTable">
+            <thead><tr><th data-sort="nom">Produit</th><th data-sort="qteVendue" class="num">Qté</th><th data-sort="ca" class="num">CA</th><th data-sort="cout" class="num">Coût</th><th data-sort="benefice" class="num">Bénéfice</th><th data-sort="marge" class="num">Marge</th><th>Statut</th></tr></thead>
+            <tbody></tbody>
+            <tfoot id="rentFoot"></tfoot>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="view" id="view-tendances">
+      <div class="section-head"><div><h1>📈 Tendances</h1><p>Évolution de ton chiffre d’affaires.</p></div></div>
+      <div class="kpi-grid">
+        <article class="kpi kpi-green"><span class="kpi-label">CA ce mois</span><strong class="kpi-value" id="tendCA">—</strong><small class="kpi-sub" id="tendCACompare">—</small></article>
+        <article class="kpi kpi-blue"><span class="kpi-label">Tendance</span><strong class="kpi-value" id="tendBadge">—</strong><small class="kpi-sub" id="tendDesc">—</small></article>
+        <article class="kpi kpi-purple"><span class="kpi-label">Ventes ce mois</span><strong class="kpi-value" id="tendCount">—</strong><small class="kpi-sub" id="tendCountCompare">—</small></article>
+        <article class="kpi kpi-yellow"><span class="kpi-label">Ticket moyen</span><strong class="kpi-value" id="tendTicket">—</strong><small class="kpi-sub">Par vente</small></article>
+      </div>
+      <article class="card chart-card">
+        <div class="card-head"><h2>Évolution du CA</h2>
+          <div class="chart-controls">
+            <div class="gran-selector">
+              <button class="gran-btn" data-gran="day">Jour</button>
+              <button class="gran-btn active" data-gran="week">Semaine</button>
+              <button class="gran-btn" data-gran="month">Mois</button>
+            </div>
+            <button class="btn btn-ghost btn-download" data-download="chartTendance">📥 PNG</button>
+          </div>
+        </div>
+        <div class="chart-wrap" id="chartTendance"></div>
+      </article>
+      <div class="charts-grid">
+        <article class="card chart-card"><div class="card-head"><h2>CA par mois</h2><button class="btn btn-ghost btn-download" data-download="chartTendanceMois">📥 PNG</button></div><div class="chart-wrap" id="chartTendanceMois"></div></article>
+        <article class="card"><h2>🏆 Top 5 produits vendus ce mois</h2><div id="topProducts"></div></article>
+      </div>
+    </section>
+
+    <section class="view" id="view-historique">
+      <div class="section-head"><div><h1>📜 Historique</h1><p>Toutes les opérations.</p></div></div>
+      <div class="filters">
+        <label>Du <input type="date" id="histFrom"></label>
+        <label>Au <input type="date" id="histTo"></label>
+        <label>Type<select id="histType"><option value="all">Tous</option><option value="vente">Entrées</option><option value="depense">Sorties</option></select></label>
+        <label>Catégorie<select id="histCat"><option value="all">Toutes</option></select></label>
+        <label>Recherche<input type="search" id="histSearch"></label>
+        <button class="btn btn-ghost" id="histReset">Réinitialiser</button>
+      </div>
+      <article class="card">
+        <div class="card-head"><h2><span id="histCount">0</span> opération(s)</h2><div class="card-actions"><button class="btn btn-ghost" id="btnExportCSV">📄 CSV</button><button class="btn btn-ghost" id="btnExportJSON">💾 JSON</button></div></div>
+        <div class="table-wrap"><table class="data-table" id="histTable"><thead><tr><th data-sort="date">Date</th><th data-sort="type">Type</th><th data-sort="categorie">Catégorie</th><th data-sort="description">Description</th><th data-sort="montant" class="num">Montant</th><th></th></tr></thead><tbody></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="view" id="view-rapports">
+      <div class="section-head">
+        <div><h1>📊 Rapports</h1><p>Analyses détaillées.</p></div>
+        <div class="card-actions"><button class="btn btn-primary" id="btnPrint">🖨️ Aperçu</button><button class="btn btn-primary" id="btnExportPDF">📄 Télécharger PDF</button></div>
+      </div>
+      <div class="report-controls">
+        <label>Période<select id="reportPeriod"><option value="month" selected>Ce mois</option><option value="lastMonth">Mois dernier</option><option value="quarter">Trimestre</option><option value="year">Cette année</option><option value="all">Tout</option></select></label>
+        <label>Granularité<select id="reportGran"><option value="day">Par jour</option><option value="week" selected>Par semaine</option><option value="month">Par mois</option></select></label>
+      </div>
+      <div class="charts-grid">
+        <article class="card chart-card"><div class="card-head"><h2>Entrées par catégorie</h2><button class="btn btn-ghost btn-download" data-download="chartCatIn">📥 PNG</button></div><div class="chart-wrap" id="chartCatIn"></div></article>
+        <article class="card chart-card"><div class="card-head"><h2>Sorties par catégorie</h2><button class="btn btn-ghost btn-download" data-download="chartCatOut">📥 PNG</button></div><div class="chart-wrap" id="chartCatOut"></div></article>
+      </div>
+      <article class="card chart-card"><div class="card-head"><h2>Évolution de la période</h2><button class="btn btn-ghost btn-download" data-download="chartReport">📥 PNG</button></div><div class="chart-wrap" id="chartReport"></div></article>
+      <article class="card"><h2>Résumé mensuel</h2><div class="table-wrap"><table class="data-table" id="summaryTable"><thead><tr><th>Mois</th><th class="num">Entrées</th><th class="num">Sorties</th><th class="num">Bénéfice</th><th class="num">Marge</th></tr></thead><tbody></tbody></table></div></article>
+    </section>
+
+    <section class="view" id="view-parametres">
+      <div class="section-head"><div><h1>⚙️ Paramètres</h1></div></div>
+      <form class="form-card" id="formSettings">
+        <div class="form-row">
+          <label>Nom de l’entreprise<input type="text" id="setCompany" maxlength="40"></label>
+          <label>Devise<select id="setCurrency"><option value="HTG">HTG — Gourde</option><option value="USD">USD — Dollar US</option><option value="EUR">EUR — Euro</option><option value="DOP">DOP — Peso dominicain</option><option value="CAD">CAD — Dollar canadien</option></select></label>
+        </div>
+        <div class="form-row">
+          <label>Taux de charges (% du CA)<input type="number" id="setCharges" min="0" max="100" step="0.1" value="0"></label>
+          <label>Taux de change (HTG / 1 USD)<input type="number" id="setTauxChange" min="0" step="0.01" value="144"></label>
+        </div>
+        <p class="hint">Le taux de charges s’applique au CA. Le taux de change sert aux imports USD (144 HTG ≈ 28.80 $).</p>
+        <div class="form-actions"><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+        <p class="form-status" id="setStatus"></p>
+      </form>
+      <article class="card">
+        <h2>Export et import</h2>
+        <div class="card-actions">
+          <button class="btn btn-primary" id="btnBackup">💾 Exporter (JSON)</button>
+          <label class="btn btn-ghost" style="cursor:pointer">📥 Importer<input type="file" id="fileImport" accept="application/json" hidden></label>
+        </div>
+        <p class="hint"><strong id="storageInfo">—</strong></p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer no-print"><p>GestionPro — données synchronisées avec Supabase</p></footer>
+</div>
+
+<div class="modal-backdrop" id="saleModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2 id="saleTitle">Vendre un produit</h2><button class="icon-btn" id="saleClose">✕</button></div>
+    <form id="saleForm" class="modal-body">
+      <div class="sale-product-info" id="saleProductInfo"></div>
+      <div class="form-row"><label>Quantité vendue<input type="number" id="saleQte" min="1" step="1" value="1" required></label><label>Date<input type="date" id="saleDate" required></label></div>
+      <label>Prix unitaire de vente (modifiable pour rabais)<input type="number" id="salePrix" step="0.01" min="0" required></label>
+      <div class="sale-total"><span>Total encaissé :</span><strong id="saleTotal">—</strong></div>
+      <div class="sale-margin" id="saleMargin"></div>
+      <p class="hint" id="saleHint"></p>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" id="saleCancel">Annuler</button><button type="submit" class="btn btn-primary">✅ Confirmer</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="productModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:640px">
+    <div class="modal-head"><h2 id="productTitle">Nouveau produit</h2><button class="icon-btn" id="productClose">✕</button></div>
+    <form id="productForm" class="modal-body">
+      <label>Nom du produit<input type="text" id="prodNom" maxlength="60" required></label>
+
+      <div class="type-toggle">
+        <button type="button" class="type-btn active" id="prodModeLocal">🏠 Local (HTG)</button>
+        <button type="button" class="type-btn" id="prodModeImport">✈️ Import (USD)</button>
+      </div>
+
+      <div id="prodLocalBlock">
+        <div class="form-row">
+          <label>Prix d’achat TOTAL du lot (HTG)<input type="number" id="prodAchatTotal" step="0.01" min="0" placeholder="Ex : 21600" required></label>
+          <label>Nombre d’unités du lot<input type="number" id="prodAchatQte" step="1" min="1" value="1" required></label>
+        </div>
+        <div class="calc-live"><span>Coût unitaire calculé :</span><strong id="prodPrixAchatCalc">—</strong></div>
+      </div>
+
+      <div id="prodImportBlock" class="hidden">
+        <div class="form-row">
+          <label>Prix UNITAIRE produit (USD)<input type="number" id="prodUsdPrix" step="0.01" min="0" placeholder="0.00"></label>
+          <label>Livraison TOTALE du lot (USD)<input type="number" id="prodUsdLivraison" step="0.01" min="0" placeholder="0.00"></label>
+        </div>
+        <div class="form-row">
+          <label>Transport TOTAL du lot (USD)<input type="number" id="prodUsdTransport" step="0.01" min="0" placeholder="0.00"></label>
+          <label>Autres frais TOTAUX (USD)<input type="number" id="prodUsdAutres" step="0.01" min="0" placeholder="0.00"></label>
+        </div>
+        <div class="form-row">
+          <label>Taux de change (HTG / 1 USD)<input type="number" id="prodTaux" step="0.01" min="0" value="144"></label>
+          <label>Nombre d’unités du lot<input type="number" id="prodUsdQte" step="1" min="1" value="1"></label>
+        </div>
+        <div class="calc-live"><span>Coût unitaire calculé :</span><strong id="prodPrixAchatCalcImport">—</strong></div>
+        <p class="hint" id="prodTauxHint">144 HTG ≈ 28.80 $ (convention locale)</p>
+      </div>
+
+      <div class="form-row">
+        <label>Prix de vente UNITAIRE (HTG)<input type="number" id="prodPrixVente" step="0.01" min="0" required></label>
+        <label>Quantité en stock<input type="number" id="prodQuantite" step="1" min="0" value="0" required></label>
+      </div>
+
+      <div class="live-margin" id="liveMarginBox">
+        <span id="liveMarginText">Entrez un prix de vente pour voir le bénéfice</span>
+      </div>
+
+      <label>Seuil d’alerte<input type="number" id="prodSeuil" step="1" min="0" value="5" required></label>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" id="productCancel">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="movementModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2 id="movementTitle">Mouvement de stock</h2><button class="icon-btn" id="movementClose">✕</button></div>
+    <form id="movementForm" class="modal-body">
+      <label>Produit<select id="movProduit" required></select></label>
+      <div class="type-toggle triple">
+        <button type="button" class="type-btn active" data-mov-type="entree">📥 Entrée</button>
+        <button type="button" class="type-btn" data-mov-type="sortie">📤 Sortie</button>
+        <button type="button" class="type-btn" data-mov-type="correction">✏️ Correction</button>
+      </div>
+      <div class="form-row"><label>Date<input type="date" id="movDate" required></label><label>Quantité<input type="number" id="movQuantite" step="1" min="0" required></label></div>
+      <label>Note<input type="text" id="movNote" maxlength="120"></label>
+      <p class="hint" id="movHint"></p>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" id="movementCancel">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="confirmModal" aria-hidden="true">
+  <div class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="confirm-body">
+      <div class="confirm-icon" id="confirmIcon">⚠️</div>
+      <h2 id="confirmTitle">Confirmer</h2>
+      <p id="confirmMessage">Es-tu sûr ?</p>
+    </div>
+    <div class="confirm-actions">
+      <button type="button" class="btn btn-ghost" id="confirmCancel">Annuler</button>
+      <button type="button" class="btn btn-primary" id="confirmOk">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div id="pdfReport" class="pdf-report">
+  <div class="pdf-header">
+    <h1>Rapport de gestion</h1>
+    <p><strong id="pdfCompany">Mon Entreprise</strong></p>
+    <p id="pdfDate">—</p>
+    <p id="pdfPeriodLabel">—</p>
+  </div>
+  <div class="pdf-section"><h2>1. Synthèse financière</h2><table class="pdf-table">
+    <tr><td>Entrées (ventes)</td><td class="num" id="pdfEntrees">—</td></tr>
+    <tr><td>Sorties (dépenses)</td><td class="num" id="pdfSorties">—</td></tr>
+    <tr><td><strong>Bénéfice brut</strong></td><td class="num" id="pdfBenefice">—</td></tr>
+    <tr><td>Charges estimées</td><td class="num" id="pdfCharges">—</td></tr>
+    <tr><td><strong>Bénéfice net</strong></td><td class="num" id="pdfNet">—</td></tr>
+    <tr><td>Marge</td><td class="num" id="pdfMarge">—</td></tr>
+  </table></div>
+  <div class="pdf-section"><h2>2. Valeur du stock</h2><table class="pdf-table">
+    <tr><td>Nombre de produits</td><td class="num" id="pdfStockCount">—</td></tr>
+    <tr><td>Somme des prix d’achat</td><td class="num" id="pdfStockValue">—</td></tr>
+    <tr><td>Estimation (prix vente)</td><td class="num" id="pdfStockSale">—</td></tr>
+    <tr><td>Produits en alerte</td><td class="num" id="pdfStockAlerts">—</td></tr>
+  </table></div>
+  <div class="pdf-section"><h2>3. Entrées par catégorie</h2><table class="pdf-table" id="pdfCatInTable"><thead><tr><th>Catégorie</th><th class="num">Montant</th><th class="num">%</th></tr></thead><tbody></tbody></table></div>
+  <div class="pdf-section"><h2>4. Sorties par catégorie</h2><table class="pdf-table" id="pdfCatOutTable"><thead><tr><th>Catégorie</th><th class="num">Montant</th><th class="num">%</th></tr></thead><tbody></tbody></table></div>
+  <div class="pdf-section"><h2>5. Rentabilité par produit</h2><table class="pdf-table" id="pdfRentTable"><thead><tr><th>Produit</th><th class="num">Qté</th><th class="num">CA</th><th class="num">Coût</th><th class="num">Bénéfice</th></tr></thead><tbody></tbody></table></div>
+  <div class="pdf-section"><h2>6. Résumé mensuel</h2><table class="pdf-table" id="pdfMonthlyTable"><thead><tr><th>Mois</th><th class="num">Entrées</th><th class="num">Sorties</th><th class="num">Bénéfice</th><th class="num">Marge</th></tr></thead><tbody></tbody></table></div>
+  <div class="pdf-section"><h2>7. Top 5 des produits vendus</h2><table class="pdf-table" id="pdfTopTable"><thead><tr><th>Produit</th><th class="num">Quantité</th></tr></thead><tbody></tbody></table></div>
+  <div class="pdf-footer"><p>Rapport généré par GestionPro le <span id="pdfGenDate">—</span></p></div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="supabase-client.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
