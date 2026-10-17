@@ -43,17 +43,17 @@ function weekKey(dateStr){
 
 let toastTimer=null;
 function toast(msg,kind=""){ const el=$("#toast"); if(!el)return; el.textContent=msg; el.className="toast show "+kind; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{el.className="toast "+kind;},3000); }
-function applyTheme(d){ document.body.classList.toggle("dark",d); const b=$("#themeToggle"); if(b)b.textContent=d?"☀️":"🌙"; try{localStorage.setItem("gp_theme",d?"dark":"light");}catch{} }
+function applyTheme(d){ document.body.classList.toggle("dark",d); const b=$("#themeToggle"); if(b)b.innerHTML = d?'<i data-lucide="sun"></i>':'<i data-lucide="moon"></i>'; try{localStorage.setItem("gp_theme",d?"dark":"light");}catch{} lucide.createIcons(); }
 applyTheme((()=>{ try{const v=localStorage.getItem("gp_theme"); if(v)return v==="dark";}catch{} return matchMedia("(prefers-color-scheme: dark)").matches; })());
 
 let confirmResolver=null;
 function showConfirm(opts={}){
-  const {title="Confirmer",message="Es-tu sûr ?",icon="⚠️",kind="warning",okText="Confirmer",cancelText="Annuler"}=opts;
+  const {title="Confirmer",message="Es-tu sûr ?",icon="alert-triangle",kind="warning",okText="Confirmer",cancelText="Annuler"}=opts;
   return new Promise(resolve=>{
     const modal=$("#confirmModal"); if(!modal){resolve(window.confirm(message.replace(/<[^>]*>/g,"")));return;}
     $("#confirmTitle").textContent=title;
     $("#confirmMessage").innerHTML=message;
-    $("#confirmIcon").textContent=icon;
+    $("#confirmIcon").innerHTML=`<i data-lucide="${icon}"></i>`;
     $("#confirmOk").textContent=okText;
     const cb=$("#confirmCancel");
     if(cancelText===""){cb.style.display="none";$(".confirm-actions").classList.add("single");}
@@ -63,6 +63,7 @@ function showConfirm(opts={}){
     else if(kind==="info")modal.classList.add("info");
     else if(kind==="success")modal.classList.add("success");
     modal.classList.add("open"); modal.setAttribute("aria-hidden","false");
+    lucide.createIcons();
     confirmResolver=resolve;
   });
 }
@@ -124,7 +125,7 @@ function traduireErreur(msg){
   return msg;
 }
 async function logout(){
-  const ok=await showConfirm({title:"Se déconnecter ?",message:"Tu pourras te reconnecter à tout moment.",icon:"🚪",kind:"info",okText:"Se déconnecter"});
+  const ok=await showConfirm({title:"Se déconnecter ?",message:"Tu pourras te reconnecter à tout moment.",icon:"log-out",kind:"info",okText:"Se déconnecter"});
   if(!ok)return;
   await sb.auth.signOut();
   toast("Déconnecté","success");
@@ -173,7 +174,7 @@ async function proposerMigration(){
   if(!ancienTx.length && !ancienProduits.length) return;
   if(products.length>0 || transactions.length>0) return;
   const total = ancienTx.length + ancienProduits.length;
-  const ok = await showConfirm({title:"Importer tes données locales ?",message:`J'ai trouvé <strong>${total} enregistrement(s)</strong> dans ce navigateur.<br><br>Les importer dans ton compte Supabase ?`,icon:"📥",kind:"info",okText:"Importer",cancelText:"Ignorer"});
+  const ok = await showConfirm({title:"Importer tes données locales ?",message:`J'ai trouvé <strong>${total} enregistrement(s)</strong> dans ce navigateur.<br><br>Les importer dans ton compte Supabase ?`,icon:"download-cloud",kind:"info",okText:"Importer",cancelText:"Ignorer"});
   if(!ok) return;
   await migrerVersCloud(ancienTx, ancienProduits, ancienMv, ancienSet);
 }
@@ -443,8 +444,9 @@ function renderSaleGrid(){
   em.classList.add("hidden");
   g.innerHTML=l.map(p=>{
     const st=Number(p.quantite)||0,out=st<=0,low=st<=Number(p.seuil);
-    return `<article class="sale-card ${out?"out-of-stock":""}"><h3>${escapeHtml(p.nom)}</h3><div class="sale-price">${fmtMoney(p.prix_vente)}</div><div class="sale-stock ${low?"low":""}">${out?"❌ Rupture":`Stock : ${st}`}</div><button type="button" data-sell="${escapeHtml(p.id)}" ${out?"disabled":""}>${out?"Indisponible":"🛒 Vendre"}</button></article>`;
+    return `<article class="sale-card ${out?"out-of-stock":""}"><h3>${escapeHtml(p.nom)}</h3><div class="sale-price">${fmtMoney(p.prix_vente)}</div><div class="sale-stock ${low?"low":""}">${out?"<i data-lucide='x-circle' style='width:14px;height:14px;'></i> Rupture":`Stock : ${st}`}</div><button type="button" data-sell="${escapeHtml(p.id)}" ${out?"disabled":""}>${out?"Indisponible":"<i data-lucide='shopping-cart' style='width:16px;height:16px;margin-right:4px;'></i> Vendre"}</button></article>`;
   }).join("");
+  lucide.createIcons();
 }
 function updateDepenseCategories(){const s=$("#depCategorie");if(!s)return;s.innerHTML=CATEGORIES.depense.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");}
 function renderDepTable(){
@@ -452,7 +454,8 @@ function renderDepTable(){
   const l=transactions.filter(t=>t.type==="depense"&&t.date===today).sort((a,b)=>b.id.localeCompare(a.id));
   const tb=$("#depTable tbody");if(!tb)return;
   if(!l.length){tb.innerHTML=`<tr class="empty-row"><td colspan="5">Aucune dépense aujourd’hui.</td></tr>`;return;}
-  tb.innerHTML=l.map(t=>`<tr><td>${fmtDate(t.date)}</td><td>${escapeHtml(t.categorie)}</td><td>${escapeHtml(t.description||"—")}</td><td class="num">− ${fmtMoney(t.montant)}</td><td><button class="row-btn danger" data-del="${t.id}">🗑️</button></td></tr>`).join("");
+  tb.innerHTML=l.map(t=>`<tr><td>${fmtDate(t.date)}</td><td>${escapeHtml(t.categorie)}</td><td>${escapeHtml(t.description||"—")}</td><td class="num">− ${fmtMoney(t.montant)}</td><td><button class="row-btn danger" data-del="${t.id}"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button></td></tr>`).join("");
+  lucide.createIcons();
 }
 function renderStock(){
   const low=lowStockProducts();
@@ -478,14 +481,15 @@ function renderStock(){
     const mg=(Number(p.prix_vente)||0)-(Number(p.prix_achat)||0);
     const isLow=Number(p.quantite)<=Number(p.seuil);
     const estim=(Number(p.prix_vente)||0)*(Number(p.quantite)||0);
-    const tag=p.import_details?' <span title="Import" style="font-size:.8rem">✈️</span>':'';
+    const tag=p.import_details?' <span title="Import" style="display:inline-flex;align-items:center;color:var(--blue);"><i data-lucide="plane" style="width:14px;height:14px;"></i></span>':'';
     const clsMarge = mg<0 ? "low-stock" : "stock-ok";
-    return `<tr><td><strong>${escapeHtml(p.nom)}</strong>${tag}</td><td class="num">${fmtMoney(p.prix_achat)}</td><td class="num">${fmtMoney(p.prix_vente)}</td><td class="num ${clsMarge}">${fmtMoney(mg)}</td><td class="num ${isLow?"low-stock":"stock-ok"}">${p.quantite}</td><td class="num" style="color:var(--purple-dark);font-weight:700">${fmtMoney(estim)}</td><td><div class="row-actions"><button class="row-btn" data-edit-product="${p.id}">✏️</button><button class="row-btn danger" data-del-product="${p.id}">🗑️</button></div></td></tr>`;
+    return `<tr><td><strong>${escapeHtml(p.nom)}</strong>${tag}</td><td class="num">${fmtMoney(p.prix_achat)}</td><td class="num">${fmtMoney(p.prix_vente)}</td><td class="num ${clsMarge}">${fmtMoney(mg)}</td><td class="num ${isLow?"low-stock":"stock-ok"}">${p.quantite}</td><td class="num" style="color:var(--purple-dark);font-weight:700">${fmtMoney(estim)}</td><td><div class="row-actions"><button class="row-btn" data-edit-product="${p.id}"><i data-lucide="edit-2" style="width:14px;height:14px;"></i></button><button class="row-btn danger" data-del-product="${p.id}"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button></div></td></tr>`;
   }).join("");}
   const mb=$("#movementTable tbody");
   const sorted=movements.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
   if(!sorted.length){mb.innerHTML=`<tr class="empty-row"><td colspan="5">Aucun mouvement.</td></tr>`;}
-  else{const types={entree:"📥 Entrée",sortie:"📤 Sortie",vente:"🛒 Vente",correction:"✏️ Correction"};mb.innerHTML=sorted.map(m=>{const p=getProduct(m.produit_id);const cls=m.type==="entree"||m.type==="correction"?"type-vente":"type-depense";return `<tr><td>${fmtDate(m.date)}</td><td>${escapeHtml(p?p.nom:"—")}</td><td class="${cls}">${types[m.type]||m.type}</td><td class="num">${m.quantite>0?"+":""}${m.quantite}</td><td>${escapeHtml(m.note||"—")}</td></tr>`;}).join("");}
+  else{const types={entree:"Entrée",sortie:"Sortie",vente:"Vente",correction:"Correction"};mb.innerHTML=sorted.map(m=>{const p=getProduct(m.produit_id);const cls=m.type==="entree"||m.type==="correction"?"type-vente":"type-depense";return `<tr><td>${fmtDate(m.date)}</td><td>${escapeHtml(p?p.nom:"—")}</td><td class="${cls}">${types[m.type]||m.type}</td><td class="num">${m.quantite>0?"+":""}${m.quantite}</td><td>${escapeHtml(m.note||"—")}</td></tr>`;}).join("");}
+  lucide.createIcons();
 }
 function renderRentabilite(){
   const {from,to}=getPeriodRange(rentPeriod);
@@ -509,11 +513,12 @@ function renderRentabilite(){
   if(!rows.length){tb.innerHTML=`<tr class="empty-row"><td colspan="7">Aucune vente.</td></tr>`;}
   else{tb.innerHTML=rows.map(row=>{
     const lo=row.benefice<0;
-    const bd=lo?`<span class="status-badge loss">❌ Perte</span>`:`<span class="status-badge profit">✅ Bénéfice</span>`;
+    const bd=lo?`<span class="status-badge loss"><i data-lucide="trending-down" style="width:12px;height:12px;"></i> Perte</span>`:`<span class="status-badge profit"><i data-lucide="trending-up" style="width:12px;height:12px;"></i> Bénéfice</span>`;
     return `<tr><td><strong>${escapeHtml(row.nom)}</strong>${row.produit_id?"":' <small style="color:var(--muted)">(libre)</small>'}</td><td class="num">${row.qteVendue}</td><td class="num">${fmtMoney(row.ca)}</td><td class="num">${fmtMoney(row.cout)}</td><td class="num ${lo?'loss-cell':'profit-cell'}">${fmtMoney(row.benefice)}</td><td class="num ${lo?'loss-cell':'profit-cell'}">${row.marge.toFixed(1)} %</td><td class="status-cell">${bd}</td></tr>`;
   }).join("");}
   const ft=$("#rentFoot");
   if(ft)ft.innerHTML=`<tr><td>Total général</td><td class="num">${r.rows.reduce((s,x)=>s+x.qteVendue,0)}</td><td class="num">${fmtMoney(r.totalCA)}</td><td class="num">${fmtMoney(r.totalCout)}</td><td class="num ${r.totalBenefice<0?'loss-cell':'profit-cell'}">${fmtMoney(r.totalBenefice)}</td><td class="num ${r.totalBenefice<0?'loss-cell':'profit-cell'}">${r.totalMarge.toFixed(1)} %</td><td></td></tr>`;
+  lucide.createIcons();
 }
 function renderTendances(){
   const now=new Date();
@@ -531,10 +536,11 @@ function renderTendances(){
   else{const s=d>=0?"+":"";cc.textContent=`${s}${d.toFixed(1)} % vs mois dernier`;cc.className="kpi-sub "+(d>3?"trend-up":d<-3?"trend-down":"trend-flat");}
   const bd=$("#tendBadge"),de=$("#tendDesc");let tr,lb,dc;
   if(cT===0&&cL===0){lb="—";dc="Pas encore de ventes";tr="flat";}
-  else if(d===null||Math.abs(d)<5){lb="➖ Stable";dc="Activité régulière";tr="flat";}
-  else if(d>=5){lb="📈 En hausse";dc="Ça monte !";tr="up";}
-  else{lb="📉 En baisse";dc="Il faut relancer les ventes";tr="down";}
-  bd.textContent=lb;bd.className="kpi-value trend-"+tr;de.textContent=dc;
+  else if(d===null||Math.abs(d)<5){lb="Stable";dc="Activité régulière";tr="flat";}
+  else if(d>=5){lb="En hausse";dc="Ça monte !";tr="up";}
+  else{lb="En baisse";dc="Il faut relancer les ventes";tr="down";}
+  bd.innerHTML = (tr==='up'?'<i data-lucide="trending-up" style="width:20px;height:20px;"></i> ':(tr==='down'?'<i data-lucide="trending-down" style="width:20px;height:20px;"></i> ':'<i data-lucide="minus" style="width:20px;height:20px;"></i> ')) + lb;
+  bd.className="kpi-value trend-"+tr;de.textContent=dc;
   $("#tendCount").textContent=cT;
   const dc2=cL>0?((cT-cL)/cL)*100:null;
   const cc2=$("#tendCountCompare");
@@ -548,7 +554,8 @@ function renderTendances(){
   const top=Array.from(tm2.entries()).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const c=$("#topProducts");
   if(!top.length){c.innerHTML=`<p class="top-empty">Aucune vente ce mois.</p>`;}
-  else{const md=["🥇","🥈","🥉","4️⃣","5️⃣"];c.innerHTML=`<div class="top-list">`+top.map(([n,q],i)=>`<div class="top-item"><span class="top-rank">${md[i]}</span><span class="top-name">${escapeHtml(n)}</span><span class="top-qty">${q} vente(s)</span></div>`).join("")+`</div>`;}
+  else{const md=["1","2","3","4","5"];c.innerHTML=`<div class="top-list">`+top.map(([n,q],i)=>`<div class="top-item"><span class="top-rank">${md[i]}</span><span class="top-name">${escapeHtml(n)}</span><span class="top-qty">${q} vente(s)</span></div>`).join("")+`</div>`;}
+  lucide.createIcons();
 }
 function renderHistCategorieOptions(){const s=$("#histCat");if(!s)return;const a=new Set();transactions.forEach(t=>a.add(t.categorie));const c=s.value;s.innerHTML=`<option value="all">Toutes</option>`+Array.from(a).sort().map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("");if([...s.options].some(o=>o.value===c))s.value=c;}
 function renderHistorique(){
@@ -560,7 +567,8 @@ function renderHistorique(){
   $("#histCount").textContent=l.length;
   const tb=$("#histTable tbody");
   if(!l.length){tb.innerHTML=`<tr class="empty-row"><td colspan="6">Aucune opération.</td></tr>`;return;}
-  tb.innerHTML=l.map(t=>`<tr><td>${fmtDate(t.date)}</td><td class="type-${t.type}">${t.type==="vente"?"Entrée":"Sortie"}</td><td>${escapeHtml(t.categorie)}</td><td>${escapeHtml(t.description||"—")}</td><td class="num">${t.type==="vente"?"+":"−"} ${fmtMoney(t.montant)}</td><td><div class="row-actions"><button class="row-btn danger" data-del="${t.id}">🗑️</button></div></td></tr>`).join("");
+  tb.innerHTML=l.map(t=>`<tr><td>${fmtDate(t.date)}</td><td class="type-${t.type}">${t.type==="vente"?"Entrée":"Sortie"}</td><td>${escapeHtml(t.categorie)}</td><td>${escapeHtml(t.description||"—")}</td><td class="num">${t.type==="vente"?"+":"−"} ${fmtMoney(t.montant)}</td><td><div class="row-actions"><button class="row-btn danger" data-del="${t.id}"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button></div></td></tr>`).join("");
+  lucide.createIcons();
 }
 function renderRapports(){
   const period=$("#reportPeriod")?.value||"month",gran=$("#reportGran")?.value||"week";
@@ -594,6 +602,7 @@ function renderAll(){
   renderSaleGrid();updateDepenseCategories();renderDepTable();
   renderStock();renderRentabilite();renderHistorique();renderRapports();
   renderTendances();renderHistCategorieOptions();
+  lucide.createIcons();
 }
 
 let saleProductId=null;
@@ -607,6 +616,7 @@ function openSaleModal(id){
   updateSaleTotal();
   $("#saleModal").classList.add("open");$("#saleModal").setAttribute("aria-hidden","false");
   setTimeout(()=>$("#saleQte").focus(),100);
+  lucide.createIcons();
 }
 function closeSaleModal(){$("#saleModal").classList.remove("open");$("#saleModal").setAttribute("aria-hidden","true");saleProductId=null;}
 function updateSaleTotal(){
@@ -619,13 +629,14 @@ function updateSaleTotal(){
   const prof=t-cost;
   const mb=$("#saleMargin");
   if(mb){
-    if(prof<0){mb.className="sale-margin loss";mb.textContent=`❌ Perte : ${fmtMoney(prof)} (coût : ${fmtMoney(cost)})`;}
-    else if(prof>0){mb.className="sale-margin profit";mb.textContent=`✅ Bénéfice : ${fmtMoney(prof)} (coût : ${fmtMoney(cost)})`;}
-    else{mb.className="sale-margin";mb.textContent=`➖ Aucun bénéfice (coût : ${fmtMoney(cost)})`;}
+    if(prof<0){mb.className="sale-margin loss";mb.innerHTML=`<i data-lucide="trending-down" style="width:18px;height:18px;"></i> Perte : ${fmtMoney(prof)} (coût : ${fmtMoney(cost)})`;}
+    else if(prof>0){mb.className="sale-margin profit";mb.innerHTML=`<i data-lucide="trending-up" style="width:18px;height:18px;"></i> Bénéfice : ${fmtMoney(prof)} (coût : ${fmtMoney(cost)})`;}
+    else{mb.className="sale-margin";mb.textContent=`Aucun bénéfice (coût : ${fmtMoney(cost)})`;}
   }
   const h=$("#saleHint");
-  if(q>p.quantite){h.textContent=`⚠️ Stock insuffisant : ${p.quantite} disponible(s).`;h.style.color="var(--red-dark)";}
+  if(q>p.quantite){h.innerHTML=`<i data-lucide="alert-triangle" style="width:14px;height:14px;"></i> Stock insuffisant : ${p.quantite} disponible(s).`;h.style.color="var(--red-dark)";}
   else{h.textContent=`Stock après vente : ${p.quantite-q}.`;h.style.color="var(--muted)";}
+  lucide.createIcons();
 }
 async function handleSaleSubmit(e){
   e.preventDefault();
@@ -634,11 +645,11 @@ async function handleSaleSubmit(e){
   if(!Number.isFinite(q)||q<=0){toast("Quantité invalide","error");return;}
   if(!Number.isFinite(pr)||pr<0){toast("Prix invalide","error");return;}
   if(!dt){toast("Date obligatoire","error");return;}
-  if(q>p.quantite){await showConfirm({title:"Stock insuffisant",message:`Il n'y a que <strong>${p.quantite}</strong> unité(s).`,icon:"⚠️",kind:"info",okText:"Compris",cancelText:""});return;}
+  if(q>p.quantite){await showConfirm({title:"Stock insuffisant",message:`Il n'y a que <strong>${p.quantite}</strong> unité(s).`,icon:"alert-circle",kind:"info",okText:"Compris",cancelText:""});return;}
   const btn=e.target.querySelector("button[type=submit]");
-  if(btn){btn.disabled=true;btn.textContent="Enregistrement…";}
+  if(btn){btn.disabled=true;btn.innerHTML="Enregistrement…";}
   const {data,error}=await sb.rpc("vendre_produit",{p_produit_id:p.id,p_quantite:q,p_prix_unitaire:pr,p_date:dt});
-  if(btn){btn.disabled=false;btn.textContent="✅ Confirmer";}
+  if(btn){btn.disabled=false;btn.innerHTML='<i data-lucide="check" style="width:18px;height:18px;"></i> Confirmer';}
   if(error){toast("Erreur : "+error.message,"error");return;}
   await Promise.all([chargerProduits(),chargerOperations(),chargerMouvements()]);
   toast(`Vente : ${fmtMoney(data?.montant||q*pr)} ✅`,"success");
@@ -651,17 +662,17 @@ async function handleDepenseSubmit(e){
   if(!date){st.textContent="Date obligatoire.";st.classList.add("error");return;}
   if(!Number.isFinite(montant)||montant<=0){st.textContent="Montant invalide.";st.classList.add("error");return;}
   const btn=e.target.querySelector("button[type=submit]");
-  if(btn){btn.disabled=true;btn.textContent="Enregistrement…";}
+  if(btn){btn.disabled=true;btn.innerHTML="Enregistrement…";}
   const {data,error}=await sb.rpc("enregistrer_depense",{p_date:date,p_montant:Math.round(montant*100)/100,p_categorie:cat,p_description:desc});
-  if(btn){btn.disabled=false;btn.textContent="💾 Enregistrer la dépense";}
+  if(btn){btn.disabled=false;btn.innerHTML='<i data-lucide="save" style="width:18px;height:18px;"></i> Enregistrer la dépense';}
   if(error){st.textContent="Erreur : "+error.message;st.classList.add("error");return;}
-  st.textContent=`Dépense enregistrée : ${fmtMoney(montant)}.`;
+  st.innerHTML=`<i data-lucide="check" style="width:14px;height:14px;"></i> Dépense enregistrée : ${fmtMoney(montant)}.`;
   e.target.reset();$("#depDate").value=todayISO();updateDepenseCategories();
   await chargerOperations();toast("Dépense enregistrée ✅","success");renderAll();
 }
 async function handleDeleteOperation(id){
   const tx=transactions.find(t=>t.id===id);if(!tx)return;
-  const ok=await showConfirm({title:"Supprimer l'opération ?",message:`<strong>${fmtDate(tx.date)}</strong><br>${escapeHtml(tx.categorie)} — <strong>${fmtMoney(tx.montant)}</strong><br><br>Cette action est irréversible.`,icon:"🗑️",kind:"danger",okText:"Supprimer",cancelText:"Annuler"});
+  const ok=await showConfirm({title:"Supprimer l'opération ?",message:`<strong>${fmtDate(tx.date)}</strong><br>${escapeHtml(tx.categorie)} — <strong>${fmtMoney(tx.montant)}</strong><br><br>Cette action est irréversible.`,icon:"trash-2",kind:"danger",okText:"Supprimer",cancelText:"Annuler"});
   if(!ok)return;
   const {error}=await sb.rpc("supprimer_operation",{p_operation_id:id});
   if(error){toast("Erreur : "+error.message,"error");return;}
@@ -679,7 +690,6 @@ function setProdMode(mode){
   $("#prodLocalBlock").classList.toggle("hidden",prodImportMode);
   $("#prodImportBlock").classList.toggle("hidden",!prodImportMode);
   
-  // CORRECTION : on gère les champs requis dynamiquement
   $("#prodAchatTotal").required = !prodImportMode;
   $("#prodAchatQte").required = !prodImportMode;
 
@@ -733,14 +743,15 @@ function updateLiveMargin(){
   const diff = vente - cost;
   if(diff < 0){
     box.className="live-margin loss";
-    txt.innerHTML=`❌ <strong>Perte de ${fmtMoney(Math.abs(diff))}</strong> par unité (coût : ${fmtMoney(cost)})`;
+    txt.innerHTML=`<i data-lucide="trending-down" style="width:18px;height:18px;"></i> <strong>Perte de ${fmtMoney(Math.abs(diff))}</strong> par unité (coût : ${fmtMoney(cost)})`;
   } else if(diff > 0){
     box.className="live-margin profit";
-    txt.innerHTML=`✅ <strong>Bénéfice de ${fmtMoney(diff)}</strong> par unité (coût : ${fmtMoney(cost)})`;
+    txt.innerHTML=`<i data-lucide="trending-up" style="width:18px;height:18px;"></i> <strong>Bénéfice de ${fmtMoney(diff)}</strong> par unité (coût : ${fmtMoney(cost)})`;
   } else {
     box.className="live-margin";
-    txt.textContent=`➖ Aucun bénéfice — prix = coût (${fmtMoney(cost)})`;
+    txt.textContent=`Aucun bénéfice — prix = coût (${fmtMoney(cost)})`;
   }
+  lucide.createIcons();
 }
 
 function openProductModal(id=null){
@@ -779,6 +790,7 @@ function openProductModal(id=null){
   }
   updateLiveMargin();
   $("#productModal").classList.add("open");$("#productModal").setAttribute("aria-hidden","false");
+  lucide.createIcons();
 }
 function closeProductModal(){$("#productModal").classList.remove("open");$("#productModal").setAttribute("aria-hidden","true");editingProductId=null;}
 
@@ -844,7 +856,7 @@ async function handleProductSubmit(e){
 }
 async function handleDeleteProduct(id){
   const p=getProduct(id);if(!p)return;
-  const ok=await showConfirm({title:"Supprimer le produit ?",message:`<strong>${escapeHtml(p.nom)}</strong>`,icon:"📦",kind:"danger",okText:"Supprimer"});
+  const ok=await showConfirm({title:"Supprimer le produit ?",message:`<strong>${escapeHtml(p.nom)}</strong>`,icon:"trash-2",kind:"danger",okText:"Supprimer"});
   if(!ok)return;
   const {error}=await sb.from("produits").delete().eq("id",id);
   if(error){toast("Erreur : "+error.message,"error");return;}
@@ -861,6 +873,7 @@ function openMovementModal(){
   $$(".type-btn[data-mov-type]").forEach(b=>b.classList.toggle("active",b.dataset.movType==="entree"));
   $("#movHint").textContent="Entrée : ajoute au stock.";
   $("#movementModal").classList.add("open");$("#movementModal").setAttribute("aria-hidden","false");
+  lucide.createIcons();
 }
 function closeMovementModal(){$("#movementModal").classList.remove("open");$("#movementModal").setAttribute("aria-hidden","true");}
 async function handleMovementSubmit(e){
@@ -870,9 +883,9 @@ async function handleMovementSubmit(e){
   if(!date){toast("Date obligatoire","error");return;}
   if(!Number.isFinite(q)||q<0){toast("Quantité invalide","error");return;}
   const btn=e.target.querySelector("button[type=submit]");
-  if(btn){btn.disabled=true;btn.textContent="Enregistrement…";}
+  if(btn){btn.disabled=true;btn.innerHTML="Enregistrement…";}
   const {data,error}=await sb.rpc("ajuster_stock",{p_produit_id:pid,p_type:movType,p_quantite:q,p_note:note||"",p_date:date});
-  if(btn){btn.disabled=false;btn.textContent="Enregistrer";}
+  if(btn){btn.disabled=false;btn.innerHTML='<i data-lucide="save" style="width:18px;height:18px;"></i> Enregistrer';}
   if(error){toast("Erreur : "+error.message,"error");return;}
   await Promise.all([chargerProduits(),chargerMouvements()]);
   toast(`Nouveau stock : ${data?.nouvelle_quantite ?? "?"}`,"success");
@@ -887,8 +900,9 @@ async function handleSettingsSubmit(e){
   const {error}=await sb.from("entreprises").update({nom,devise,taux_charges,taux_change}).eq("id",entrepriseId);
   if(error){$("#setStatus").textContent="Erreur : "+error.message;$("#setStatus").classList.add("error");return;}
   settings={nom,devise,taux_change,taux_charges};
-  $("#setStatus").textContent="Enregistré ✅";
+  $("#setStatus").innerHTML='<i data-lucide="check" style="width:14px;height:14px;"></i> Enregistré ✅';
   renderAll();toast("Paramètres ✅","success");
+  lucide.createIcons();
 }
 function exportBackup(){
   const d={exportedAt:new Date().toISOString(),settings,transactions,products,movements};
@@ -912,6 +926,7 @@ function bindNav(){
     if(v==="tendances")renderTendances();
     if(v==="historique"){renderHistCategorieOptions();renderHistorique();}
     if(v==="rapports")renderRapports();
+    lucide.createIcons();
   }));
   document.addEventListener("click",e=>{const t=e.target.closest("[data-goto]");if(!t)return;const tab=$$(".tab").find(x=>x.dataset.view===t.dataset.goto);if(tab)tab.click();});
   $$(".period-btn").forEach(b=>b.addEventListener("click",()=>{$$(".period-btn").forEach(x=>x.classList.toggle("active",x===b));currentPeriod=b.dataset.period;renderKPI();renderRecentTable();}));
@@ -1032,6 +1047,31 @@ function buildPDFReport(){
   $("#pdfGenDate").textContent=new Date().toLocaleString("fr-FR");
 }
 
+/* ===== GESTION DU BANDEAU D'INSTALLATION ===== */
+function initInstallBanner() {
+  const banner = document.getElementById("installBanner");
+  const closeBtn = document.getElementById("closeBanner");
+  if (!banner || !closeBtn) return;
+
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const hasClosed = localStorage.getItem("gp_hideInstallBanner") === "true";
+
+  if (!isStandalone && !hasClosed) {
+    setTimeout(() => {
+      banner.classList.remove("hidden");
+      void banner.offsetWidth; 
+      banner.classList.add("show");
+      lucide.createIcons();
+    }, 1500);
+  }
+
+  closeBtn.addEventListener("click", () => {
+    banner.classList.remove("show");
+    setTimeout(() => banner.classList.add("hidden"), 300);
+    localStorage.setItem("gp_hideInstallBanner", "true");
+  });
+}
+
 async function start(){
   bindUI();
   bindNav();
@@ -1043,6 +1083,10 @@ async function start(){
   $("#histTo") && ($("#histTo").value=todayISO());
   $("#depDate") && ($("#depDate").value=todayISO());
   updateDepenseCategories();
+  lucide.createIcons();
+  
+  // Activation du bandeau d'installation
+  initInstallBanner();
 }
 window.addEventListener("supabase:ready",start);
 if(window.sb) start();
