@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="GestionPro — gestion : ventes, dépenses, stock, rentabilité.">
 <title>GestionPro</title>
 <link rel="stylesheet" href="style.css">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
-<link rel="manifest" href="./site.webmanifest">
+<link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#10b981">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,7 +27,6 @@
     <span>Installez l'application GestionPro pour un accès plus rapide.</span>
   </div>
   <div class="install-actions">
-    <!-- Le lien ci-dessous pointe vers ton fichier APK sur GitHub -->
     <a href="./GestionPro.apk" download class="btn btn-primary btn-sm">Télécharger l'APK</a>
     <button id="closeBanner" class="btn-close" aria-label="Fermer">
       <i data-lucide="x" style="width: 18px; height: 18px;"></i>
@@ -39,8 +38,8 @@
   <div class="auth-card">
     <div class="auth-brand">
       <div class="brand-mark-pro" style="display:flex; justify-content:center; margin-bottom:1rem;">
-        <!-- ⬇️ TON LOGO ICI (Écran de connexion) -->
-        <img src="./icon-192.png" alt="Logo GestionPro" style="width: 64px; height: 64px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <!-- LOGO CORRIGÉ ICI -->
+        <img src="./android-chrome-192x192.png" alt="Logo GestionPro" style="width: 64px; height: 64px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
       </div>
       <h1>GestionPro</h1>
       <p id="authSubtitle">Connecte-toi pour gérer ton entreprise</p>
@@ -66,8 +65,8 @@
   <header class="topbar no-print">
     <div class="topbar-inner">
       <div class="brand">
-        <!-- ⬇️ TON LOGO ICI (En haut à gauche) -->
-        <img src="./icon-192.png" alt="Logo GestionPro" style="width: 32px; height: 32px; border-radius: 8px;">
+        <!-- LOGO CORRIGÉ ICI -->
+        <img src="./android-chrome-192x192.png" alt="Logo GestionPro" style="width: 32px; height: 32px; border-radius: 8px;">
         <div><strong>GestionPro</strong><small id="companyName">Mon Entreprise</small></div>
       </div>
       <div class="topbar-actions">
@@ -454,7 +453,7 @@
   // Activation du Service Worker pour la PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(console.error);
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
     });
   }
 </script>
