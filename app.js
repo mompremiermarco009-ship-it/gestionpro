@@ -678,6 +678,11 @@ function setProdMode(mode){
   $("#prodModeImport").classList.toggle("active",prodImportMode);
   $("#prodLocalBlock").classList.toggle("hidden",prodImportMode);
   $("#prodImportBlock").classList.toggle("hidden",!prodImportMode);
+  
+  // CORRECTION : on gère les champs requis dynamiquement
+  $("#prodAchatTotal").required = !prodImportMode;
+  $("#prodAchatQte").required = !prodImportMode;
+
   if(prodImportMode)updateImportCalc();
   else updateLocalCalc();
   updateLiveMargin();
