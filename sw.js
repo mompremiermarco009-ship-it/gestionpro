@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestionpro-v2';
+const CACHE_NAME = 'gestionpro-v3';
 const ASSETS = [
   './',
   './index.html',
