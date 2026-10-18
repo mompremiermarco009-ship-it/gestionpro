@@ -254,11 +254,43 @@ function filterTx(list,{from,to,type,categorie,query}={}){
   });
 }
 function sum(l){return l.reduce((s,t)=>s+Number(t.montant||0),0);}
+
+// ====== CORRECTION ICI : CALCUL DU BÉNÉFICE ======
 function computeTotals(l){
   const inL=l.filter(t=>t.type==="vente"),outL=l.filter(t=>t.type==="depense");
-  const e=sum(inL),s=sum(outL),bb=e-s,ch=e*(Number(settings.taux_charges)||0)/100,bn=bb-ch,m=e>0?(bb/e)*100:0;
-  return{entrees:e,sorties:s,beneficeBrut:bb,beneficeNet:bn,charges:ch,marge:m,countIn:inL.length,countOut:outL.length};
+  const e=sum(inL); // Total Ventes (Chiffre d'affaires)
+  const s=sum(outL); // Total Dépenses
+
+  // Calcul du coût d'achat total des produits vendus (COGS)
+  let cogs = 0;
+  inL.forEach(t => {
+      let pa = t.prix_achat_unitaire;
+      // Si le prix d'achat n'est pas enregistré dans l'opération, on le récupère du produit
+      if (pa == null && t.produit_id) {
+          const p = products.find(prod => prod.id === t.produit_id);
+          if (p) pa = p.prix_achat;
+      }
+      if (pa != null) {
+          cogs += (Number(pa) * Number(t.quantite || 1));
+      }
+  });
+
+  // Bénéfice brut = Ventes - Prix d'achat des produits
+  const bb = e - cogs; 
+  
+  // Charges estimées (% du CA)
+  const ch = e * (Number(settings.taux_charges) || 0) / 100; 
+  
+  // Bénéfice net = Bénéfice brut - Dépenses - Charges
+  const bn = bb - s - ch; 
+  
+  // Marge (basée sur le bénéfice brut par rapport aux ventes)
+  const m = e > 0 ? (bb / e) * 100 : 0;
+
+  return {entrees:e, sorties:s, cogs:cogs, beneficeBrut:bb, beneficeNet:bn, charges:ch, marge:m, countIn:inL.length, countOut:outL.length};
 }
+// =================================================
+
 function groupByMonth(l){const m=new Map();l.forEach(t=>{const k=monthKey(t.date);if(!m.has(k))m.set(k,{month:k,entrees:0,sorties:0});const r=m.get(k);if(t.type==="vente")r.entrees+=Number(t.montant);else r.sorties+=Number(t.montant);});return Array.from(m.values()).sort((a,b)=>a.month.localeCompare(b.month));}
 function groupByCategory(l,type){const m=new Map();l.filter(t=>t.type===type).forEach(t=>{const k=t.categorie||"Autre";m.set(k,(m.get(k)||0)+Number(t.montant));});return Array.from(m.entries()).map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value);}
 function getProduct(id){return products.find(p=>p.id===id);}
@@ -318,7 +350,10 @@ function renderKPI(){
   $("#periodLabel").textContent=periodLabel(currentPeriod);
   $("#kpiStockValue").textContent=fmtMoney(productStockValue());
   $("#kpiStockCount").textContent=`${products.length} produit(s)`;
-  $("#alertPerte").classList.toggle("hidden",t.beneficeBrut>=0);
+  
+  // Alerte basée sur le bénéfice NET maintenant
+  $("#alertPerte").classList.toggle("hidden",t.beneficeNet>=0);
+  
   $("#alertCharges").classList.toggle("hidden",!(settings.taux_charges>0&&t.sorties>0));
   const low=lowStockProducts();
   const aEl=$("#alertStock");
@@ -1053,24 +1088,19 @@ function initInstallBanner() {
   const closeBtn = document.getElementById("closeBanner");
   if (!banner || !closeBtn) return;
 
-  // Vérifier si l'appli tourne déjà en mode application (PWA installée)
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   
-  // Si on est sur le navigateur (pas installé), on affiche le bandeau À CHAQUE FOIS
   if (!isStandalone) {
     setTimeout(() => {
       banner.classList.remove("hidden");
-      // Force le navigateur à recalculer l'affichage pour lancer l'animation
       void banner.offsetWidth; 
       banner.classList.add("show");
       lucide.createIcons();
-    }, 1000); // Apparaît après 1 seconde
+    }, 1000);
   }
 
-  // Si l'utilisateur clique sur la croix pour fermer
   closeBtn.addEventListener("click", () => {
     banner.classList.remove("show");
-    // On le cache visuellement, mais on ne l'enregistre PLUS dans le localStorage
     setTimeout(() => banner.classList.add("hidden"), 300);
   });
 }
@@ -1088,7 +1118,6 @@ async function start(){
   updateDepenseCategories();
   lucide.createIcons();
   
-  // Activation du bandeau d'installation
   initInstallBanner();
 }
 window.addEventListener("supabase:ready",start);
