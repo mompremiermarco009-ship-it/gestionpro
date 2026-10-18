@@ -257,30 +257,45 @@ function sum(l){return l.reduce((s,t)=>s+Number(t.montant||0),0);}
 
 // ====== CORRECTION DU CALCUL DU BÉNÉFICE ======
 function computeTotals(l){
-  const inL=l.filter(t=>t.type==="vente"),outL=l.filter(t=>t.type==="depense");
-  const e=sum(inL); // Ventes totales
-  const s=sum(outL); // Dépenses totales
+  const inL = l.filter(t => t.type === "vente");
+  const outL = l.filter(t => t.type === "depense");
+
+  const totalVentes = sum(inL); // Le total de ce que vous avez encaissé
+  const totalDepenses = sum(outL); // Le total des dépenses (loyer, transport...)
 
   // Calcul du coût total d'achat des produits vendus
-  let cogs = 0;
+  let totalAchats = 0;
   inL.forEach(t => {
       let pa = t.prix_achat_unitaire;
+      // Si l'opération n'a pas sauvegardé le prix d'achat, on le cherche dans le produit
       if (pa == null && t.produit_id) {
           const p = products.find(prod => prod.id === t.produit_id);
           if (p) pa = p.prix_achat;
       }
       if (pa != null) {
-          cogs += (Number(pa) * Number(t.quantite || 1));
+          totalAchats += (Number(pa) * Number(t.quantite || 1));
       }
   });
 
-  const bb = e - cogs; // Bénéfice brut = Ventes - Coût d'achat
-  const ch = e * (Number(settings.taux_charges) || 0) / 100; // Charges estimées
-  const bn = bb - s - ch; // Bénéfice net = Bénéfice brut - Dépenses - Charges
+  // 1. Bénéfice Brut = Prix de vente total - Prix d'achat total
+  const beneficeBrut = totalVentes - totalAchats; 
   
-  const m = e > 0 ? (bb / e) * 100 : 0; // Marge
+  // 2. Bénéfice Net = Bénéfice Brut - Dépenses
+  const beneficeNet = beneficeBrut - totalDepenses; 
+  
+  const marge = totalVentes > 0 ? (beneficeBrut / totalVentes) * 100 : 0;
 
-  return {entrees:e, sorties:s, cogs:cogs, beneficeBrut:bb, beneficeNet:bn, charges:ch, marge:m, countIn:inL.length, countOut:outL.length};
+  return {
+    entrees: totalVentes, 
+    sorties: totalDepenses, 
+    cogs: totalAchats, 
+    beneficeBrut: beneficeBrut, 
+    beneficeNet: beneficeNet, 
+    charges: 0, 
+    marge: marge, 
+    countIn: inL.length, 
+    countOut: outL.length
+  };
 }
 // ==============================================
 
@@ -290,7 +305,6 @@ function getProduct(id){return products.find(p=>p.id===id);}
 
 // ====== CORRECTION DE LA SOMME DES PRIX D'ACHAT ======
 function productStockCost(){
-  // Multiplie le prix d'achat par la quantité en stock
   return products.reduce((s,p) => s + ((Number(p.prix_achat) || 0) * (Number(p.quantite) || 0)), 0);
 }
 // ===================================================
@@ -493,7 +507,7 @@ function renderDepTable(){
 function renderStock(){
   const low=lowStockProducts();
   $("#stockTotalProducts").textContent=products.length;
-  $("#stockTotalCost").textContent=fmtMoney(productStockCost()); // Utilise la fonction corrigée
+  $("#stockTotalCost").textContent=fmtMoney(productStockCost());
   $("#stockTotalSale").textContent=fmtMoney(productStockValue());
   $("#stockAlerts").textContent=low.length;
   const bx=$("#stockAlertBox");
