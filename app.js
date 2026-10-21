@@ -71,15 +71,40 @@ function closeConfirm(r){ const m=$("#confirmModal"); if(m){m.classList.remove("
 
 async function initAuth(){
   const { data } = await sb.auth.getSession();
-  if(data.session){ userEmail=data.session.user.email; await onLoggedIn(data.session.user); }
-  else { showAuthScreen(); }
+  
+  // On cache l'écran de chargement
+  $("#loadingScreen").classList.add("hidden");
+
+  if(data.session){ 
+    userEmail=data.session.user.email; 
+    $("#landingScreen").classList.add("hidden"); 
+    $("#authScreen").classList.add("hidden");
+    await onLoggedIn(data.session.user); 
+  }
+  else { 
+    $("#landingScreen").classList.remove("hidden");
+    $("#authScreen").classList.add("hidden"); 
+  }
+
   sb.auth.onAuthStateChange(async (event, session) => {
-    if(event==="SIGNED_IN" && session){ userEmail=session.user.email; await onLoggedIn(session.user); }
-    else if(event==="SIGNED_OUT"){ showAuthScreen(); }
+    if(event==="SIGNED_IN" && session){ 
+      userEmail=session.user.email; 
+      $("#landingScreen").classList.add("hidden");
+      await onLoggedIn(session.user); 
+    }
+    else if(event==="SIGNED_OUT"){ 
+      showAuthScreen(); 
+    }
   });
 }
-function showAuthScreen(){ $("#authScreen").classList.remove("hidden"); $("#appScreen").classList.add("hidden"); userEmail=null; entrepriseId=null; products=[]; transactions=[]; movements=[]; }
-function showAppScreen(){ $("#authScreen").classList.add("hidden"); $("#appScreen").classList.remove("hidden"); }
+
+function showAuthScreen(){ 
+  $("#landingScreen").classList.remove("hidden"); 
+  $("#authScreen").classList.add("hidden"); 
+  $("#appScreen").classList.add("hidden"); 
+  userEmail=null; entrepriseId=null; products=[]; transactions=[]; movements=[]; 
+}
+function showAppScreen(){ $("#landingScreen").classList.add("hidden"); $("#authScreen").classList.add("hidden"); $("#appScreen").classList.remove("hidden"); }
 function setAuthMode(mode){
   authMode=mode; const isLogin=mode==="login";
   $("#authTabLogin").classList.toggle("active",isLogin);
@@ -255,19 +280,17 @@ function filterTx(list,{from,to,type,categorie,query}={}){
 }
 function sum(l){return l.reduce((s,t)=>s+Number(t.montant||0),0);}
 
-// ====== CORRECTION DU CALCUL DU BÉNÉFICE ======
+// ====== CALCUL DU BÉNÉFICE CORRIGÉ ======
 function computeTotals(l){
   const inL = l.filter(t => t.type === "vente");
   const outL = l.filter(t => t.type === "depense");
 
-  const totalVentes = sum(inL); // Le total de ce que vous avez encaissé
-  const totalDepenses = sum(outL); // Le total des dépenses (loyer, transport...)
+  const totalVentes = sum(inL);
+  const totalDepenses = sum(outL);
 
-  // Calcul du coût total d'achat des produits vendus
   let totalAchats = 0;
   inL.forEach(t => {
       let pa = t.prix_achat_unitaire;
-      // Si l'opération n'a pas sauvegardé le prix d'achat, on le cherche dans le produit
       if (pa == null && t.produit_id) {
           const p = products.find(prod => prod.id === t.produit_id);
           if (p) pa = p.prix_achat;
@@ -277,12 +300,8 @@ function computeTotals(l){
       }
   });
 
-  // 1. Bénéfice Brut = Prix de vente total - Prix d'achat total
   const beneficeBrut = totalVentes - totalAchats; 
-  
-  // 2. Bénéfice Net = Bénéfice Brut - Dépenses
   const beneficeNet = beneficeBrut - totalDepenses; 
-  
   const marge = totalVentes > 0 ? (beneficeBrut / totalVentes) * 100 : 0;
 
   return {
@@ -303,7 +322,7 @@ function groupByMonth(l){const m=new Map();l.forEach(t=>{const k=monthKey(t.date
 function groupByCategory(l,type){const m=new Map();l.filter(t=>t.type===type).forEach(t=>{const k=t.categorie||"Autre";m.set(k,(m.get(k)||0)+Number(t.montant));});return Array.from(m.entries()).map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value);}
 function getProduct(id){return products.find(p=>p.id===id);}
 
-// ====== CORRECTION DE LA SOMME DES PRIX D'ACHAT ======
+// ====== SOMME DES PRIX D'ACHAT CORRIGÉE ======
 function productStockCost(){
   return products.reduce((s,p) => s + ((Number(p.prix_achat) || 0) * (Number(p.quantite) || 0)), 0);
 }
@@ -1056,6 +1075,22 @@ function bindUI(){
       if($("#productModal")?.classList.contains("open"))closeProductModal();
       if($("#movementModal")?.classList.contains("open"))closeMovementModal();
     }
+  });
+
+  // Boutons de la page d'accueil
+  $("#goToLoginBtn")?.addEventListener("click", () => {
+    $("#landingScreen").classList.add("hidden");
+    $("#authScreen").classList.remove("hidden");
+    setAuthMode("login");
+  });
+  $("#goToSignupBtn")?.addEventListener("click", () => {
+    $("#landingScreen").classList.add("hidden");
+    $("#authScreen").classList.remove("hidden");
+    setAuthMode("signup");
+  });
+  $("#backToLandingBtn")?.addEventListener("click", () => {
+    $("#authScreen").classList.add("hidden");
+    $("#landingScreen").classList.remove("hidden");
   });
 }
 function buildPDFReport(){
