@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tableau de bord - GestionPro</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+
+<!-- BARRE D'ANNONCE ADMIN (Cachée par défaut) -->
+<div id="adminAnnouncementBar" class="announcement-bar hidden">
+  <div style="display:flex; align-items:center; gap:0.5rem;">
+    <i data-lucide="megaphone" style="width:18px;height:18px;"></i>
+    <span id="announcementText">Bienvenue sur GestionPro !</span>
+  </div>
+  <button id="closeAnnouncement" style="background:none;border:none;color:white;cursor:pointer;"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+</div>
+
+<div id="appScreen" class="app-screen">
+  <header class="topbar no-print">
+    <!-- Le reste de votre header habituel -->
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="./android-chrome-192x192.png" alt="Logo" style="width: 32px; border-radius: 8px;">
+        <div><strong>GestionPro</strong><small id="companyName">Chargement...</small></div>
+      </div>
+      <div class="topbar-actions">
+        <small id="userEmail" style="color:var(--muted);font-size:.8rem"></small>
+        <button class="icon-btn" id="themeToggle"><i data-lucide="moon"></i></button>
+        <button class="icon-btn" id="logoutBtn"><i data-lucide="log-out"></i></button>
+      </div>
+    </div>
+    <nav class="tabbar">
+      <!-- Vos onglets habituels -->
+      <button class="tab active" data-view="dashboard"><i data-lucide="layout-dashboard"></i> Tableau de bord</button>
+      <button class="tab" data-view="vente"><i data-lucide="shopping-cart"></i> Vente</button>
+      <button class="tab" data-view="depense"><i data-lucide="arrow-up-right"></i> Dépense</button>
+      <button class="tab" data-view="stock"><i data-lucide="package"></i> Stock <span class="badge-alert hidden" id="stockBadge">0</span></button>
+      <button class="tab" data-view="rentabilite"><i data-lucide="award"></i> Rentabilité</button>
+      <button class="tab" data-view="tendances"><i data-lucide="line-chart"></i> Tendances</button>
+      <button class="tab" data-view="historique"><i data-lucide="history"></i> Historique</button>
+      <button class="tab" data-view="rapports"><i data-lucide="bar-chart-2"></i> Rapports</button>
+      <button class="tab" data-view="parametres"><i data-lucide="settings"></i> Paramètres</button>
+    </nav>
+  </header>
+
+  <!-- ... TOUT VOTRE CODE MAIN (dashboard, vente, stock, etc.) VA ICI ... -->
+  <!-- (Copiez-collez tout le contenu de <main> de votre ancien fichier ici) -->
+  
+</div>
+
+<!-- ... TOUTES VOS MODALES (saleModal, productModal, etc.) VONT ICI ... -->
+
+<script src="supabase-client.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
