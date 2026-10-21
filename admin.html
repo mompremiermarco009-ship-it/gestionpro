@@ -8,41 +8,58 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <link rel="manifest" href="/site.webmanifest">
 <style>
-  .admin-container { max-width: 1000px; margin: 2rem auto; padding: 2rem; }
-  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .admin-container { max-width: 1000px; margin: 3rem auto; padding: 0 1.5rem; }
+  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
   @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } }
+  .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: var(--surface); padding: 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+  
+  /* ÉCRAN DE SÉCURITÉ (Rideau) */
+  .security-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; text-align: center; padding: 2rem; }
+  .security-screen.hidden { display: none !important; }
+  .admin-panel.hidden { display: none !important; }
 </style>
 </head>
 <body style="background: var(--bg);">
 
-<div class="admin-container">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
-    <h1>Panneau d'Administration</h1>
-    <a href="dashboard.html" class="btn btn-ghost">Retour à l'app</a>
+<!-- ÉCRAN DE SÉCURITÉ (On ne voit que ça au début) -->
+<div id="securityScreen" class="security-screen">
+  <div class="loading-spinner" style="margin-bottom: 1rem;"></div>
+  <h2>Vérification des accès...</h2>
+  <p class="hint">Veuillez patienter.</p>
+</div>
+
+<!-- PANNEAU ADMIN (Caché par défaut) -->
+<div id="adminPanel" class="admin-container admin-panel hidden">
+  <div class="admin-header">
+    <div>
+      <h1 style="color: var(--text); margin: 0;">Panneau d'Administration</h1>
+      <p class="hint" style="margin-top: .3rem;">Gérez les annonces et consultez les comptes.</p>
+    </div>
+    <a href="dashboard.html" class="btn btn-ghost"><i data-lucide="arrow-left"></i> Retour à l'app</a>
   </div>
 
   <div class="admin-grid">
     <!-- GESTION DES ANNONCES -->
     <div class="card">
-      <h2>📢 Publier une annonce</h2>
-      <p class="hint">Cette annonce apparaîtra en haut du tableau de bord de tous les utilisateurs.</p>
-      <div class="form-card" style="box-shadow:none; padding:0; margin-top:1rem;">
+      <h2 style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="megaphone" style="color:var(--green);"></i> Publier une annonce</h2>
+      <p class="hint" style="margin-bottom:1.5rem;">Ce message apparaîtra en haut du tableau de bord de tous vos utilisateurs.</p>
+      
+      <div class="form-card" style="box-shadow:none; padding:0; border:none;">
         <label>Texte de l'annonce
-          <input type="text" id="announcementInput" placeholder="Ex: Promo de lancement sur les casques !">
+          <input type="text" id="announcementInput" placeholder="Ex: Promo spéciale sur les casques !" style="margin-top:.5rem;">
         </label>
-        <div style="display:flex; gap:1rem; margin-top:1rem;">
-          <button id="btnPublishAnnouncement" class="btn btn-primary">Publier l'annonce</button>
-          <button id="btnRemoveAnnouncement" class="btn btn-danger">Retirer l'annonce</button>
+        <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+          <button id="btnPublishAnnouncement" class="btn btn-primary" style="flex:1;">Publier l'annonce</button>
+          <button id="btnRemoveAnnouncement" class="btn btn-danger" style="flex:1;">Retirer</button>
         </div>
-        <p id="adminStatus" class="form-status"></p>
       </div>
     </div>
 
     <!-- LISTE DES UTILISATEURS -->
     <div class="card">
-      <h2>👥 Comptes Utilisateurs</h2>
-      <p class="hint">Liste des personnes inscrites sur GestionPro.</p>
-      <div class="table-wrap" style="margin-top:1rem; max-height: 300px; overflow-y:auto;">
+      <h2 style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="users" style="color:var(--blue);"></i> Comptes Utilisateurs</h2>
+      <p class="hint" style="margin-bottom:1rem;">Liste des personnes inscrites.</p>
+      <div class="table-wrap" style="max-height: 250px; overflow-y:auto; border: 1px solid var(--border); border-radius: var(--radius-sm);">
         <table class="data-table" id="usersTable">
           <thead><tr><th>Email</th><th>Date d'inscription</th></tr></thead>
           <tbody><tr><td colspan="2" style="text-align:center;">Chargement...</td></tr></tbody>
