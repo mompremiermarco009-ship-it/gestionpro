@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Connexion - GestionPro</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+
+<div class="auth-screen">
+  <div class="auth-card">
+    <a href="index.html" class="back-link"><i data-lucide="arrow-left"></i> Retour à l'accueil</a>
+    
+    <div class="auth-brand">
+      <img src="./android-chrome-192x192.png" alt="Logo" style="width: 64px; border-radius: 16px; margin-bottom: 1rem;">
+      <h1>GestionPro</h1>
+      <p id="authSubtitle">Connecte-toi pour gérer ton entreprise</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="authTabLogin">Connexion</button>
+      <button type="button" class="auth-tab" id="authTabSignup">Créer un compte</button>
+    </div>
+
+    <form id="authForm" class="auth-form">
+      <label>Adresse e-mail<input type="email" id="authEmail" required placeholder="toi@exemple.com"></label>
+      <label>Mot de passe<input type="password" id="authPassword" required minlength="6" placeholder="6 caractères minimum"></label>
+      <label id="authConfirmWrap" class="hidden">Confirme le mot de passe<input type="password" id="authPasswordConfirm" minlength="6"></label>
+      <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Se connecter</button>
+      <p class="auth-status" id="authStatus" role="status"></p>
+    </form>
+  </div>
+</div>
+
+<!-- MODALE DE CONFIRMATION D'EMAIL -->
+<div id="emailModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal confirm-modal info" role="dialog" aria-modal="true" style="text-align:center;">
+    <button class="icon-btn close-modal-btn" id="closeEmailModal" style="position:absolute;top:10px;right:10px;"><i data-lucide="x"></i></button>
+    <div class="confirm-body" style="padding-top: 3rem;">
+      <div class="confirm-icon" style="background:#dbeafe; color:#1e40af;">
+        <i data-lucide="mail-check" style="width:32px;height:32px;"></i>
+      </div>
+      <h2>Vérifie tes emails !</h2>
+      <p>Un lien de confirmation t'a été envoyé.<br>Clique dessus pour activer ton compte, puis reviens te connecter.</p>
+      <button class="btn btn-primary" id="btnOkEmail" style="margin-top:1rem; width:100%;">J'ai compris</button>
+    </div>
+  </div>
+</div>
+
+<script src="supabase-client.js"></script>
+<script src="auth.js"></script> <!-- NOUVEAU FICHIER JS -->
+</body>
+</html>
