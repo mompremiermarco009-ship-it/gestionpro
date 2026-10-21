@@ -26,7 +26,7 @@
 <main class="landing-main">
   <section class="hero-section">
     <div class="hero-content">
-      <span class="badge-trust">⭐️⭐️⭐️⭐️⭐️ Utilisé par des dizaines et plus de commerçants</span>
+      <span class="badge-trust">⭐️⭐️⭐️⭐️⭐️ Utilisé par des dizaines de commerçants</span>
       <h1>Prenez le contrôle total de votre entreprise.</h1>
       <p>Suivez vos ventes, gérez votre stock, calculez vos bénéfices réels et prenez de meilleures décisions. GestionPro est l'outil tout-en-un pour les commerçants modernes.</p>
       <div class="hero-actions">
@@ -35,7 +35,7 @@
       </div>
     </div>
     <div class="hero-image">
-      <!-- VOTRE CAPTURE D'ÉCRAN ICI -->
+      <!-- VOTRE CAPTURE D'ÉCRAN -->
       <img src="./app-preview.png" alt="Interface de GestionPro" class="hero-screenshot">
     </div>
   </section>
@@ -68,6 +68,15 @@
 
 <script>
   lucide.createIcons();
+</script>
+
+<!-- Activation du Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    });
+  }
 </script>
 </body>
 </html>
