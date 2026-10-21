@@ -14,6 +14,20 @@
   <div class="loading-spinner"></div>
 </div>
 
+<!-- ===== BANDEAU D'INSTALLATION APK (RÉINTÉGRÉ ICI) ===== -->
+<div id="installBanner" class="install-banner hidden">
+  <div class="install-text">
+    <i data-lucide="smartphone" style="width: 20px; height: 20px; color: var(--green);"></i>
+    <span>Installez l'application GestionPro pour un accès plus rapide.</span>
+  </div>
+  <div class="install-actions">
+    <a href="./GestionPro.apk" download class="btn btn-primary btn-sm">Télécharger l'APK</a>
+    <button id="closeBanner" class="btn-close" aria-label="Fermer">
+      <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+    </button>
+  </div>
+</div>
+
 <div id="adminAnnouncementBar" class="announcement-bar hidden">
   <div style="display:flex; align-items:center; gap:0.5rem;">
     <i data-lucide="megaphone" style="width:18px;height:18px;"></i>
@@ -257,8 +271,7 @@
   </footer>
 </div>
 
-<!-- ===== TOUTES LES MODALES SONT ICI ===== -->
-
+<!-- MODALES -->
 <div class="modal-backdrop" id="saleModal" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head"><h2 id="saleTitle">Vendre un produit</h2><button class="icon-btn" id="saleClose"><i data-lucide="x"></i></button></div>
