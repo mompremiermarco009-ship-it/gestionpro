@@ -1,5 +1,5 @@
 const $ = (s, r = document) => r.querySelector(s);
-const ADMIN_EMAIL = "dieudlynv@gmail.com"; // REMPLACEZ PAR VOTRE EMAIL SUPABASE
+const ADMIN_EMAIL = "mompremiermarc09@gmail.com"; // REMPLACEZ PAR VOTRE EMAIL SUPABASE
 
 window.addEventListener("supabase:ready", async () => {
   const { data } = await sb.auth.getSession();
