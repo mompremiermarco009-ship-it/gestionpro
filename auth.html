@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://unpkg.com/lucide@latest"></script>
 <link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#10b981">
 </head>
 <body>
 
@@ -51,6 +52,15 @@
 </div>
 
 <script src="supabase-client.js"></script>
-<script src="auth.js"></script> <!-- NOUVEAU FICHIER JS -->
+<script src="auth.js"></script>
+
+<!-- Activation du Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    });
+  }
+</script>
 </body>
 </html>
