@@ -20,6 +20,30 @@
 </head>
 <body>
 
+<!-- ===== ÉCRAN DE CHARGEMENT ===== -->
+<div id="loadingScreen" class="loading-overlay">
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- ===== PAGE D'ACCUEIL (LANDING PAGE) ===== -->
+<div id="landingScreen" class="landing-screen hidden">
+  <div class="landing-content">
+    <img src="./android-chrome-192x192.png" alt="Logo GestionPro" style="width: 80px; height: 80px; border-radius: 20px; box-shadow: 0 10px 25px rgba(16,185,129,0.3); margin-bottom: 1rem;">
+    <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--text); line-height: 1.2; margin-bottom: 1rem;">Gérez votre business<br><span style="color: var(--green);">sans stress.</span></h1>
+    <p style="color: var(--muted); font-size: 1.1rem; max-width: 400px; margin: 0 auto 2rem;">Suivez vos ventes, vos dépenses et votre stock en temps réel. Prenez le contrôle de vos bénéfices dès aujourd'hui.</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px; margin: 0 auto;">
+      <button id="goToLoginBtn" class="btn btn-primary" style="padding: 1rem; font-size: 1.1rem; border-radius: 12px; box-shadow: 0 8px 20px rgba(16,185,129,0.3);">Se connecter à mon espace</button>
+      <button id="goToSignupBtn" class="btn btn-ghost" style="padding: 1rem; font-size: 1.1rem; border-radius: 12px; background: var(--surface);">Créer un compte gratuit</button>
+    </div>
+
+    <div style="margin-top: 3rem; display: flex; gap: 1.5rem; justify-content: center; color: var(--muted); font-size: 0.9rem;">
+      <span style="display:flex; align-items:center; gap:0.3rem;"><i data-lucide="shield-check" style="width:16px;height:16px; color:var(--green);"></i> 100% Sécurisé</span>
+      <span style="display:flex; align-items:center; gap:0.3rem;"><i data-lucide="smartphone" style="width:16px;height:16px; color:var(--green);"></i> Utilisable partout</span>
+    </div>
+  </div>
+</div>
+
 <!-- ===== BANDEAU D'INSTALLATION APK ===== -->
 <div id="installBanner" class="install-banner hidden">
   <div class="install-text">
@@ -34,7 +58,8 @@
   </div>
 </div>
 
-<div id="authScreen" class="auth-screen">
+<!-- ===== ÉCRAN DE CONNEXION ===== -->
+<div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
     <div class="auth-brand">
       <div class="brand-mark-pro" style="display:flex; justify-content:center; margin-bottom:1rem;">
@@ -54,11 +79,13 @@
       <button type="submit" class="btn btn-primary auth-submit" id="authSubmit">Se connecter</button>
       <p class="auth-status" id="authStatus" role="status"></p>
       <p class="auth-switch" id="authSwitch">Pas encore de compte ? <button type="button" class="link-btn" id="authSwitchBtn">Créer un compte</button></p>
+      <p class="auth-switch" style="margin-top:1rem;"><button type="button" class="link-btn" id="backToLandingBtn" style="color:var(--muted)">← Retour à l'accueil</button></p>
     </form>
     <div class="auth-footer"><p class="hint" style="display:flex; align-items:center; justify-content:center; gap:.4rem;"><i data-lucide="shield-check" style="width:16px;height:16px;"></i> Tes données sont sécurisées.</p></div>
   </div>
 </div>
 
+<!-- ===== APPLICATION ===== -->
 <div id="appScreen" class="app-screen hidden">
   <a class="skip" href="#contenu">Aller au contenu</a>
   <header class="topbar no-print">
