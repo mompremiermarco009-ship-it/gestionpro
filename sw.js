@@ -1,21 +1,26 @@
-const CACHE_NAME = 'gestionpro-v9';
+const CACHE_NAME = 'gestionpro-v10'; // Version très élevée pour tout réinitialiser
 const ASSETS = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './supabase-client.js',
-  './manifest.json'
+  '/',
+  '/index.html',
+  '/auth.html',
+  '/dashboard.html',
+  '/admin.html', // On le met en cache aussi, mais il est protégé par mot de passe
+  '/style.css',
+  '/app.js',
+  '/auth.js',
+  '/admin.js',
+  '/supabase-client.js',
+  '/site.webmanifest',
+  '/android-chrome-192x192.png'
 ];
 
-// Installation : on met en cache les fichiers de base
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
-// Activation : on supprime les anciens caches si on change la version
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -26,18 +31,23 @@ self.addEventListener('activate', (e) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Interception : on sert le cache si on est hors ligne, sinon on va sur internet
 self.addEventListener('fetch', (e) => {
-  // On ne met pas en cache les requêtes vers Supabase (les données doivent être fraîches)
   if (e.request.url.includes('supabase.co')) return;
   
+  // On utilise une stratégie "Network First" pour être sûr d'avoir la dernière version des pages
   e.respondWith(
-    caches.match(e.request).then((res) => {
-      return res || fetch(e.request);
-    })
+    fetch(e.request)
+      .then((res) => {
+        const resClone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, resClone);
+        });
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
