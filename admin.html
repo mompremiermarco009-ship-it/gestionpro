@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin - GestionPro</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="manifest" href="/site.webmanifest">
+<style>
+  .admin-container { max-width: 1000px; margin: 2rem auto; padding: 2rem; }
+  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body style="background: var(--bg);">
+
+<div class="admin-container">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+    <h1>Panneau d'Administration</h1>
+    <a href="dashboard.html" class="btn btn-ghost">Retour à l'app</a>
+  </div>
+
+  <div class="admin-grid">
+    <!-- GESTION DES ANNONCES -->
+    <div class="card">
+      <h2>📢 Publier une annonce</h2>
+      <p class="hint">Cette annonce apparaîtra en haut du tableau de bord de tous les utilisateurs.</p>
+      <div class="form-card" style="box-shadow:none; padding:0; margin-top:1rem;">
+        <label>Texte de l'annonce
+          <input type="text" id="announcementInput" placeholder="Ex: Promo de lancement sur les casques !">
+        </label>
+        <div style="display:flex; gap:1rem; margin-top:1rem;">
+          <button id="btnPublishAnnouncement" class="btn btn-primary">Publier l'annonce</button>
+          <button id="btnRemoveAnnouncement" class="btn btn-danger">Retirer l'annonce</button>
+        </div>
+        <p id="adminStatus" class="form-status"></p>
+      </div>
+    </div>
+
+    <!-- LISTE DES UTILISATEURS -->
+    <div class="card">
+      <h2>👥 Comptes Utilisateurs</h2>
+      <p class="hint">Liste des personnes inscrites sur GestionPro.</p>
+      <div class="table-wrap" style="margin-top:1rem; max-height: 300px; overflow-y:auto;">
+        <table class="data-table" id="usersTable">
+          <thead><tr><th>Email</th><th>Date d'inscription</th></tr></thead>
+          <tbody><tr><td colspan="2" style="text-align:center;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="supabase-client.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
